@@ -7,8 +7,11 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.config.SchemaContextHolder;
+import com.example.demo.config.SchemaType;
 import com.example.demo.domain.model.User;
 import com.example.demo.service.UserService;
 
@@ -21,7 +24,12 @@ public class UsersController {
 	private UserService userService;
 	
 	@RequestMapping(value = "/", method = RequestMethod.GET )
-	public Map<String, List<User>> Index() {
+	public Map<String, List<User>> Index(@RequestParam("ds") String ds) {
+		if(ds.equals("ds1")) {
+			SchemaContextHolder.setSchemaType(SchemaType.DATA1);
+		}else {
+			SchemaContextHolder.setSchemaType(SchemaType.DATA2);
+		}
 		List<User> users = this.userService.getUsers();
 		Map<String, List<User>> result = new HashMap();
 		result.put("users", users);
