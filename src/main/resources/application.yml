@@ -12,3 +12,14 @@ server:
   port: 8081
 doma:
   dialect: postgres
+my.datasource.abstract:
+  driverClassName: org.postgresql.Driver
+datasource:
+  data1:
+    url: jdbc:postgresql://localhost:15432/postgres
+    username: postgres
+    password: secret
+  data2:
+    url: jdbc:postgresql://localhost:15433/postgres
+    username: postgres
+    password: secret

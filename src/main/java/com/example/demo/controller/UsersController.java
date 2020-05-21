@@ -24,12 +24,7 @@ public class UsersController {
 	private UserService userService;
 	
 	@RequestMapping(value = "/", method = RequestMethod.GET )
-	public Map<String, List<User>> Index(@RequestParam("ds") String ds) {
-		if(ds.equals("ds1")) {
-			SchemaContextHolder.setSchemaType(SchemaType.DATA1);
-		}else {
-			SchemaContextHolder.setSchemaType(SchemaType.DATA2);
-		}
+	public Map<String, List<User>> Index(@RequestParam(name = "dt",defaultValue = "dt1") String ds) {
 		List<User> users = this.userService.getUsers();
 		Map<String, List<User>> result = new HashMap();
 		result.put("users", users);
