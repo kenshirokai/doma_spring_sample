@@ -1,0 +1,103 @@
+buildscript {
+	ext {
+		springBootVersion = '1.5.17.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven { url 'https://repo.spring.io/plugins-release' }
+	}
+	dependencies {
+					classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+					classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
+	}
+}
+
+
+
+//gradleが利用するプラグイン
+plugins {
+	id 'org.springframework.boot' version '2.3.0.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	//これのおかげでjavaをコンパイルできた
+	id 'java'
+	id 'eclipse'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+task copyDomaResources(type: Sync)  {
+    from sourceSets.main.resources.srcDirs
+    println 'SQLファイルのコピー元'
+    println sourceSets.main.resources.srcDirs
+    into compileJava.destinationDir
+    println 'SQLファイルのコピー先'
+    println compileJava.destinationDir
+    include 'doma.compile.config'
+    include 'META-INF/**/*.sql'
+    include 'META-INF/**/*.script'
+}
+eclipse {
+  classpath {
+    //javaデフォルト出力パスを指定
+    defaultOutputDir = file('bin/main')
+    file {
+      whenMerged { classpath ->
+     	println classpath
+        classpath.entries.findAll { entry ->
+          if (entry.kind == "src" && entry.output == 'bin/main_') {
+            entry.output = 'bin/main'
+          }
+        }
+      }
+    }
+  }
+}
+//task setOutputDir {
+	//eclipse.classpath.defaultOutputDir = file("bin/main")
+//}
+compileJava {
+    dependsOn copyDomaResources
+    options.encoding = 'UTF-8'
+}
+//依存関係をダウンロード・参照してくるリポジトリ
+repositories {
+	mavenCentral()
+}
+//ビルド時に必要な依存関係
+dependencies {
+	//implementarion で指定すると依存関係が伝播しない
+	implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.flywaydb:flyway-core'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	runtimeOnly 'org.postgresql:postgresql'
+	annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+	//DOMA2の依存関係
+	//implementationでは読み込めなかったstsがサポートしているgradleのverが3.*までなのが原因かも
+	compile("org.seasar.doma:doma:2.19.2")
+	compile("org.seasar.doma.boot:doma-spring-boot-starter:1.1.1")
+	
+	annotationProcessor "org.seasar.doma:doma:2.19.2"
+	
+	//implementation 'org.seaser.doma:doma:2.19.2'
+	//implementation 'org.seaser.doma.boot:doma-spring-boot-starter:1.1.1'
+	//重要！！DaoのBean登録に関わる
+	//annotationProcessor 'org.sersar.doma:doma:2.19.2'
+}
+
+test {
+	useJUnitPlatform()
+}
